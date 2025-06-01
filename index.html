@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipdrop BG Remover | Maintain Original Quality</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --gray: #8d99ae;
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+
+        .app-header h2 {
+            font-weight: 500;
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-stats {
+            display: flex;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-item .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stat-item .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .app-content {
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        .upload-section, .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 3px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .drop-area {
+            border: 3px dashed #dce6f5;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #fafcff;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .drop-area:hover, .drop-area.active {
+            border-color: var(--primary);
+            background-color: #f0f5ff;
+        }
+
+        .drop-area i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .drop-area:hover i {
+            transform: translateY(-5px);
+        }
+
+        .drop-area h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .drop-area p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-dark), var(--secondary));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: #f8fafd;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-image: 
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+            object-fit: contain;
+        }
+
+        .image-preview .placeholder {
+            color: var(--gray);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .image-preview .placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-controls {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .processing {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 15px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quality-info {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+
+        .quality-info h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .quality-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        .resolution-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .app-content {
+                flex-direction: column;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clipdrop BG Remover</h1>
+            <p>Remove backgrounds without losing quality - get pixel-perfect results every time</p>
+        </header>
+
+        <div class="app-container">
+            <div class="app-header">
+                <h2><i class="fas fa-magic"></i> Quality-First Background Removal</h2>
+                <div class="app-stats">
+                    <div class="stat-item">
+                        <div class="number">HD</div>
+                        <div class="label">Quality</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">100%</div>
+                        <div class="label">Original</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">0.5s</div>
+                        <div class="label">Processing</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="upload-section">
+                    <h3 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Upload Image</h3>
+                    <div class="drop-area" id="dropArea">
+                        <i class="fas fa-file-image"></i>
+                        <h3>Drag & Drop your image here</h3>
+                        <p>or click to browse files</p>
+                        <p>Supports: JPG, PNG, WEBP (Max 10MB)</p>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <button class="btn" id="browseBtn"><i class="fas fa-folder-open"></i> Browse Files</button>
+                    </div>
+
+                    <div class="image-preview">
+                        <div class="placeholder" id="uploadPlaceholder">
+                            <i class="fas fa-image"></i>
+                            <p>Your image will appear here</p>
+                        </div>
+                        <img id="originalPreview" alt="Original image">
+                        <div class="resolution-info" id="originalResolution"></div>
+                    </div>
+
+                    <div class="quality-info">
+                        <h4><i class="fas fa-info-circle"></i> Quality Preservation</h4>
+                        <p>We process your original file directly to maintain maximum quality. The downloaded image will be identical in resolution to your uploaded file.</p>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn" id="processBtn"><i class="fas fa-cogs"></i> Remove Background</button>
+                        <button class="btn btn-outline" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+                    </div>
+                </div>
+
+                <div class="preview-section">
+                    <h3 class="section-title"><i class="fas fa-image"></i> Result Preview</h3>
+                    <div class="result-container">
+                        <div class="image-preview">
+                            <div class="placeholder" id="resultPlaceholder">
+                                <i class="fas fa-clone"></i>
+                                <p>Processed image will appear here</p>
+                            </div>
+                            <img id="resultPreview" alt="Background removed image">
+                            <div class="resolution-info" id="resultResolution"></div>
+                            <div class="processing" id="processing">
+                                <div class="spinner"></div>
+                                <h3>Removing Background...</h3>
+                                <p>Preserving your original image quality</p>
+                            </div>
+                        </div>
+
+                        <div class="quality-info">
+                            <h4><i class="fas fa-download"></i> Download Instructions</h4>
+                            <p>Click the download button to get the original quality result. The image will be in PNG format with transparent background.</p>
+                        </div>
+
+                        <div class="result-controls">
+                            <div>
+                                <button class="btn btn-outline" id="downloadBtn" disabled><i class="fas fa-download"></i> Download Original Quality</button>
+                            </div>
+                            <div>
+                                <button class="btn" id="tryAnotherBtn"><i class="fas fa-sync"></i> Try Another Image</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-crown"></i>
+                <h3>Original Quality</h3>
+                <p>We maintain your image's original resolution and quality throughout the entire process.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-file-download"></i>
+                <h3>Lossless Download</h3>
+                <p>Download the processed image without any compression or quality reduction.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-expand"></i>
+                <h3>High-Resolution Support</h3>
+                <p>Process images up to 10MB with support for HD and 4K resolutions.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 Mazu Sharaf | Professional Quality Background Removal | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const originalPreview = document.getElementById('originalPreview');
+            const resultPreview = document.getElementById('resultPreview');
+            const processBtn = document.getElementById('processBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const tryAnotherBtn = document.getElementById('tryAnotherBtn');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const resultPlaceholder = document.getElementById('resultPlaceholder');
+            const processing = document.getElementById('processing');
+            const originalResolution = document.getElementById('originalResolution');
+            const resultResolution = document.getElementById('resultResolution');
+            
+            let uploadedFile = null;
+            let processedImageBlob = null;
+            let originalImageResolution = null;
+
+            // Clipdrop API configuration
+            const API_KEY = 'f95a983881ae71d083389de32f4db61deb970fce77cabaafa8f9f3708a916359399fac02613679edd39ad233149f8173';
+            const API_URL = 'https://clipdrop-api.co/remove-background/v1';
+
+            // Event listeners for file selection
+            browseBtn.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('active');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('active');
+            }
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                handleFile(file);
+            }
+
+            // Handle the selected file
+            function handleFile(file) {
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file (JPG, PNG, or WEBP)');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size exceeds 10MB limit');
+                    return;
+                }
+                
+                uploadedFile = file;
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    originalPreview.src = e.target.result;
+                    originalPreview.style.display = 'block';
+                    uploadPlaceholder.style.display = 'none';
+                    processBtn.disabled = false;
+                    
+                    // Get original image resolution
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImageResolution = {
+                            width: img.width,
+                            height: img.height
+                        };
+                        originalResolution.textContent = `${img.width} × ${img.height}`;
+                        originalResolution.style.display = 'block';
+                    };
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+
+            // Process the image using Clipdrop API
+            processBtn.addEventListener('click', function() {
+                if (!uploadedFile) {
+                    alert('Please upload an image first');
+                    return;
+                }
+                
+                // Show processing animation
+                processing.style.display = 'flex';
+                
+                const form = new FormData();
+                form.append('image_file', uploadedFile);
+                
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: form
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to remove background. Please check your API key.');
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    // Create blob from arrayBuffer
+                    const blob = new Blob([buffer], { type: 'image/png' });
+                    processedImageBlob = blob;
+                    
+                    // Create a preview URL
+                    const url = URL.createObjectURL(blob);
+                    
+                    resultPreview.src = url;
+                    resultPreview.style.display = 'block';
+                    resultPlaceholder.style.display = 'none';
+                    downloadBtn.disabled = false;
+                    
+                    // Show resolution info
+                    const img = new Image();
+                    img.onload = function() {
+                        resultResolution.textContent = `${img.width} × ${img.height}`;
+                        resultResolution.style.display = 'block';
+                        
+                        // Show resolution match status
+                        if (originalImageResolution) {
+                            if (img.width === originalImageResolution.width && 
+                                img.height === originalImageResolution.height) {
+                                resultResolution.style.backgroundColor = 'rgba(76, 201, 240, 0.7)';
+                            } else {
+                                resultResolution.style.backgroundColor = 'rgba(255, 100, 100, 0.7)';
+                            }
+                        }
+                    };
+                    img.src = url;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error removing background: ' + error.message);
+                })
+                .finally(() => {
+                    processing.style.display = 'none';
+                });
+            });
+
+            // Download the result in original quality
+            downloadBtn.addEventListener('click', function() {
+                if (!processedImageBlob) {
+                    alert('No processed image available');
+                    return;
+                }
+                
+                // Create a download URL directly from the blob
+                const url = URL.createObjectURL(processedImageBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'background-removed.png';
+                document.body.appendChild(link);
+                link.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            });
+
+            // Reset functionality
+            resetBtn.addEventListener('click', resetApp);
+            tryAnotherBtn.addEventListener('click', resetApp);
+            
+            function resetApp() {
+                fileInput.value = '';
+                uploadedFile = null;
+                processedImageBlob = null;
+                originalImageResolution = null;
+                originalPreview.src = '';
+                originalPreview.style.display = 'none';
+                resultPreview.src = '';
+                resultPreview.style.display = 'none';
+                uploadPlaceholder.style.display = 'block';
+                resultPlaceholder.style.display = 'block';
+                processBtn.disabled = true;
+                downloadBtn.disabled = true;
+                originalResolution.style.display = 'none';
+                resultResolution.style.display = 'none';
+            }
+
+            // Initial state
+            resetApp();
+        });
+    </script>
+</body>
+</html>
